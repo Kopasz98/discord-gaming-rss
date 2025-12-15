@@ -2,6 +2,7 @@ import feedparser
 import requests
 import json
 import os
+import hashlib
 
 WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 
@@ -22,7 +23,46 @@ RSS_FEEDS = [
     "https://www.reddit.com/r/gaming.rss"
 ]
 
+INCLUDE_KEYWORDS = [
+    "steam", "playstation", "xbox", "nintendo",
+    "pc", "console",
+    "patch", "update", "release",
+    "gpu", "hardware",
+    "unity", "unreal",
+    "esports", "indie"
+]
+
+EXCLUDE_KEYWORDS = [
+    "rumor", "leak", "unconfirmed",
+    "giveaway", "free skins",
+    "sale", "discount",
+    "top 10", "best of",
+    "opinion", "editorial"
+]
+
 POSTED_FILE = "posted.json"
+
+
+def is_relevant(entry):
+    text = (
+        entry.get("title", "") +
+        " " +
+        entry.get("summary", "")
+    ).lower()
+
+    if not any(keyword in text for keyword in INCLUDE_KEYWORDS):
+        return False
+
+    if any(keyword in text for keyword in EXCLUDE_KEYWORDS):
+        return False
+
+    return True
+
+
+def entry_id(entry):
+    base = entry.get("id") or entry.get("link") or entry.get("title", "")
+    return hashlib.sha256(base.encode("utf-8")).hexdigest()
+
 
 if os.path.exists(POSTED_FILE):
     with open(POSTED_FILE, "r") as f:
@@ -30,16 +70,31 @@ if os.path.exists(POSTED_FILE):
 else:
     posted = set()
 
+new_posts = []
+
 for feed_url in RSS_FEEDS:
     feed = feedparser.parse(feed_url)
+
     for entry in feed.entries[:5]:
-        link = entry.get("link")
-        if link and link not in posted:
-            data = {
-                "content": f"🎮 **{entry.title}**\n{link}"
-            }
-            requests.post(WEBHOOK_URL, json=data)
-            posted.add(link)
+        if not is_relevant(entry):
+            continue
+
+        eid = entry_id(entry)
+        if eid in posted:
+            continue
+
+        new_posts.append({
+            "title": entry.title,
+            "link": entry.link
+        })
+
+        posted.add(eid)
+
+for post in new_posts:
+    data = {
+        "content": f"🎮 **{post['title']}**\n{post['link']}"
+    }
+    requests.post(WEBHOOK_URL, json=data)
 
 with open(POSTED_FILE, "w") as f:
     json.dump(list(posted), f)
