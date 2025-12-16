@@ -70,7 +70,7 @@ INCLUDE_KEYWORDS = [k.lower() for k in [
     "Assassin’s Creed", "Biotech Gameworks","CD Project Red","Cyberpunk","DayZ","Dying Light","Electronic Arts","EA",
     "Epic Games","Respawn Entertainment","Fallout","Game Awards","GTA","Hello Games","io interactive","FromSoftware","Krafton",
     "Leslie Benzies","MindsEye","No Man’s Sky","Overwatch","PlayerUnknown’s Battlegrounds","Polyphony Digital","Rainbow Six Siege",
-    "R6S","Raven Software","ready or not","Schedule 1","Sims","Snail Games","ARK","Techland","tekken","Tom Clancy’s Rainbow Six Siege X"
+    "R6S","Raven Software","ready or not","Schedule 1","Sims","Snail Games","ARK","Techland","tekken","Tom Clancy’s Rainbow Six Siege X",
     "TVGS","Tyler’s Video Game Studio","void interactive","EA Sports FC",
 ]]
 
